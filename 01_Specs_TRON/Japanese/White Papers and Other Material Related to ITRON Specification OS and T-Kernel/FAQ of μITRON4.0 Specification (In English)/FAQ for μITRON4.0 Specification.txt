@@ -1,0 +1,84 @@
+FAQ for μITRON4.0 Specification
+This page introduces µITRON4.0 specification in detail in FAQ format.
+
+“equal to or greater than the activation phase” in the explanation of the cyclic handler
+Timing of cyclic activation handler
+Will the task exception handling routine start in the dispatching disabled state?
+In CPU locked state, what happens if you request a service call that may be in a waiting state?
+When is an E_CTX error returned?
+How do I pass dynamic parameters (variables) when starting tasks, cyclic handlers, and alarm handlers in the standard profile?
+What does “equal to or greater than the activation phase” mean in the following text on pages 241 to 242 in "4.7.2 Cyclic Handlers" of the μITRON specification ver. 4.03?
+The activation phase is the relative time from the time when the service call to create the cyclic handler was invoked. Therefore, it must be guaranteed that the first activation of the cyclic handlers must occur after an elapsed time equal to or greater than the specified activation phase and the service call to create the cyclic handler is invoked.
+
+This means that the first activation of the cyclic handler must occur after an elapsed time equal to or greater than the activation phase (as long as the cyclic handler is in an operational state).
+
+The activation cycle is the relative time from the last activation time. This means that the n-th activation of the cyclic handler must occur after an elapsed time equal to or greater than ((activation phase) + (activation cycle) * (n – 1)) from the time when the service call to create the cyclic handler was invoked.
+
+Answer
+This part is written by applying the common rules for handling relative time, as explained in “2.1.9 Relative Time and System Time,” to the activation phase.
+
+The following is a supplementary explanation of relative time.
+
+In the µITRON4.0 specification, the time event must actually occur after the specified relative time has elapsed. In other words, the following relationship must be guaranteed.
+
+(Actual time until an event occurs) ≧ (Specified relative time)Most kernels use fixed-cycle timer interrupts, so the following examples
+
+will be based on that assumption.
+
+Example 1:
+Take the case where the system time unit is 1 millisecond, the timer interrupt cycle is also 1 millisecond, and tslp_tsk(3) is invoked when the system time is 2. You might simply think that 2 + 3 = 5 so it should time out when the system time is 5, but that's not the case. The system time is 2, which means that some time has actually elapsed since the system time was updated to 2. α can take a value in the range (0 < α ≤ timer interrupt cycle time = 1 ms), but of course the kernel cannot recognize α. Therefore, in order to reliably satisfy the above formula, it is necessary to measure the relative time 3 starting from the time of the next update of system time to 3. As a result, in this example, the behavior of tslp_tsk(3) that times out when the system time is updated to 6 is correct.
+
+Example 2:
+If the system time unit is 1 millisecond and the timer interrupt cycle is 5 milliseconds, and tslp_tsk(11) is invoked when the system time is 10, the behavior tslp_tsk(11) that times out at the time of updating of system time to 25 is correct, as shown in the figure below.
+
+The timing of the cycle start handler is difficult to understand even if I read the specifications many times.
+Answer
+The time at which the cyclic handler should be started is determined by the relative time from the starting time for each cycle. Specifically, there are the following cases. For how to handle relative time, please refer to the answer to Question 1.
+
+1. If the TA_PHS attribute is not specified
+
+(a) If the operation starts because of the TA_STA attribute,
+The relative time Tn from the point of initial generation of the handler to the n-th handler activation is deemed as follows.
+　　　Tn = (cycle phase) + (cycle time) × (n-1)
+(b) When the operation starts because of sta_cyc
+The relative time Tn from the origin specified by sta_cyc, until the n-th handler activation is deemed as follows.
+　　　Tn = (cycle time) × n
+2. If the TA_PHS attribute is not specified
+
+The relative time Tn from the initial creation of the handler to the timing at which the n-th handler is invoked is treated the same as (a) in (1). However, whether or not the cyclic handler is activated at that timing depends on the operational state of the cyclic handler at that time.
+
+Please also note that if the cycle time is shorter than the timer interrupt cycle, there may be cases where the cyclic handler must be started more than once at the same timing. For example, if the cycle time of the cyclic handler is two milliseconds and the timer interrupt cycle time is four milliseconds, the cyclic handler will be started twice each time a timer interrupt occurs. If the cyclic handler starts only once at the timing of the timer interrupt, the above specifications will not be met.
+
+Will the task exception handling routine start in the dispatching disabled state?
+Answer
+As described in the [Supplemental Information] of the specification “4.3 Task Exception Handling Functions,” the task exception handling routine starts when the conditions for starting it are met. The specification states that the dispatching disabled state does not change when the task exception handling routine starts or ends. What you need to be careful of here is that if you request permission to dispatch within the task exception handling routine, there is a possibility that a task switch will occur.
+
+Therefore, if a request is made to set the dispatching permission state within a task exception handling routine, and the task that defines that task exception handling routine enters the dispatching disabled state, the task exception handling disabled state must be set during the processing in the dispatching disabled state. 
+
+In CPU locked state, what happens if you request a service call that may put a task in a waiting state?
+Answer
+As described in the specification “3.5.4 CPU Locked State,” service calls that can be called are limited in the CPU locked state. If you request a service call other than the allowed service call, you will receive an E_CTX error.
+
+However, E_CTX errors may be omitted because it is implementation definition. If omitted, the behavior is undefined.
+
+When is an E_CTX error returned?
+Answer
+E_CTX error indicates that the context that called the service call is not in a state where it can call the service call.
+
+The following are some specific examples of situations
+
+A service call for a non-task context, such as iact_tsk, was called from a task (task context) (Specification 3.6 Service Call Invocation from Non-Task Contexts)
+In a non-task context such as interrupt handler, a service call for task context such as chg_pri was called.
+All service calls that implicitly specify invoking task, such as service calls that may put the calling task into a waiting state, are for task context (Specification 3.6 Service Call Invocation from Non-Task Contexts).
+In the CPU locked state, a service call that cannot be called in the CPU locked state, such as act_tsk, was called (Specification 3.5.4 CPU Locked State).
+In the dispatching disabled state, a service call that puts the calling task into a waiting state such as slp_tsk was called (Specification 3.5.5 Dispatching Disabled State).
+(However, if a service call is invoked that may put the calling task into a waiting state in the dispatching disabled state, it depends on the implementation whether to unconditionally return an error or to detect an error when the conditions for entering a wait state are met. For example, if wai_sem is called for a semaphore with a positive semaphore count, the kernel may either fail the call or let it return normally.)
+etc.
+
+However, E_CTX errors belong to the calling context error class, and their detection can be omitted because it is implementation defined (Specification 2.3.2 ITRON General Constants (2) Main Error Codes). In other words, whether or not an E_CTX error is returned depends on the kernel implementation.
+
+In addition, there are internal error class, unsupported error class, and parameter error class as the error classes that can be omitted from the implementation definition. If the kernel omits error detection, the behavior is undefined when the error condition occurs (Specification 2.1.6 Return Values of Service Calls and Error Codes).
+
+How do I pass dynamic parameters (variables) when starting tasks, cyclic handlers, and alarm handlers in the standard profile?
+Answer
+When creating a task using the static API, you can pass a pointer to a global variable in the extended information (exinf) and refer to the global variable via exinf.
