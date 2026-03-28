@@ -1,3 +1,6 @@
 [submodule "04_Source_Code/arduino-esp32"]
 	path = 04_Source_Code/arduino-esp32
 	url = https://github.com/hoteizero/arduino-esp32.git
+[submodule "04_Source_Code/copilot-playwright"]
+	path = 04_Source_Code/copilot-playwright
+	url = https://github.com/hoteizero/playwright-generate-test.git
