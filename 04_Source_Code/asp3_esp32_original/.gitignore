@@ -1,0 +1,19 @@
+# TOPPERS related files
+*.o
+*.d
+*/asp
+asp.*
+cfg1_out*
+cfg2_out*
+kernel_cfg.*
+libkernel.a
+offset.h
+offset.timestamp
+check.timestamp
+gen/
+
+## VSCode settings
+# workspace setting
+.vscode/settings.json
+# Cortex-Debug related files
+.vscode/.cortex-debug*

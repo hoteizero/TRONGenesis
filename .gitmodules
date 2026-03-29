@@ -4,3 +4,36 @@
 [submodule "04_Source_Code/copilot-playwright"]
 	path = 04_Source_Code/copilot-playwright
 	url = https://github.com/hoteizero/playwright-generate-test.git
+[submodule "04_Source_Code/core/comm/mros2-asp3"]
+	path = 04_Source_Code/core/comm/mros2-asp3
+	url = https://github.com/hoteizero/mros2-asp3-f767zi.git
+[submodule "04_Source_Code/hardware/esp32/xiaozhi"]
+	path = 04_Source_Code/hardware/esp32/xiaozhi
+	url = https://github.com/hoteizero/xiaozhi-esp32.git
+[submodule "04_Source_Code/ai/agents/claude-code"]
+	path = 04_Source_Code/ai/agents/claude-code
+	url = https://github.com/hoteizero/everything-claude-code.git
+[submodule "04_Source_Code/ai/tools/kb-builder"]
+	path = 04_Source_Code/ai/tools/kb-builder
+	url = https://github.com/hoteizero/knowledge-base-builder.git
+[submodule "04_Source_Code/ai/tools/work-plugins"]
+	path = 04_Source_Code/ai/tools/work-plugins
+	url = https://github.com/hoteizero/knowledge-work-plugins.git
+[submodule "04_Source_Code/hardware/claw/openclaw"]
+	path = 04_Source_Code/hardware/claw/openclaw
+	url = https://github.com/hoteizero/openclaw.git
+[submodule "04_Source_Code/apps/superpowers"]
+	path = 04_Source_Code/apps/superpowers
+	url = https://github.com/hoteizero/superpowers.git
+[submodule "04_Source_Code/apps/testing/webapp"]
+	path = 04_Source_Code/apps/testing/webapp
+	url = https://github.com/hoteizero/webapp-testing.git
+[submodule "04_Source_Code/apps/planner"]
+	path = 04_Source_Code/apps/planner
+	url = https://github.com/hoteizero/project-planner.git
+[submodule "04_Source_Code/ai/tools/legal-analyzer"]
+	path = 04_Source_Code/ai/tools/legal-analyzer
+	url = https://github.com/hoteizero/legal-document-analyzer.git
+[submodule "04_Source_Code/apps/ui-ux"]
+	path = 04_Source_Code/apps/ui-ux
+	url = https://github.com/hoteizero/ui-ux-pro-max-skill.git
